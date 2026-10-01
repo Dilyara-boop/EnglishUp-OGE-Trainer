@@ -1,0 +1,81 @@
+(function () {
+  'use strict';
+  const style = document.createElement('style');
+  style.textContent = `
+    .oge-ai-launch{position:fixed;right:20px;bottom:20px;z-index:200;border:0;border-radius:999px;padding:13px 19px;background:linear-gradient(100deg,#6559e6,#459edc);color:#fff;font:750 15px system-ui,sans-serif;box-shadow:0 10px 32px #25265c44;cursor:pointer}.oge-ai-launch[hidden]{display:none}
+    .oge-ai-dialog{position:fixed;right:20px;bottom:82px;width:min(410px,calc(100vw - 32px));height:min(520px,calc(100dvh - 110px));z-index:201;display:flex;flex-direction:column;background:#fff;border:1px solid #dedaf5;border-radius:22px;box-shadow:0 18px 60px #25265c55;overflow:hidden;color:#273153;font:15px/1.45 system-ui,sans-serif}
+    .oge-ai-dialog[hidden]{display:none}.oge-ai-head{padding:14px 17px;background:linear-gradient(110deg,#6259dd,#4da1da);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px}.oge-ai-title{display:flex;align-items:center;gap:11px}.oge-ai-avatar{display:grid;place-items:center;width:39px;height:39px;border-radius:13px;background:#ffffff34;font-size:20px}.oge-ai-head strong{display:block;font-size:16px}.oge-ai-head small{display:block;font-size:12px;opacity:.88}.oge-ai-close{width:34px;height:34px;background:#ffffff2b;border:0;border-radius:10px;color:#fff;font-size:23px;line-height:1;cursor:pointer}
+    .oge-ai-log{padding:18px;min-height:0;overflow:auto;flex:1;display:flex;flex-direction:column;gap:12px}.oge-ai-line{padding:11px 14px;border-radius:16px;max-width:90%;white-space:pre-wrap;overflow-wrap:anywhere}.oge-ai-line.user{align-self:flex-end;background:#eeeaff;border-bottom-right-radius:5px}.oge-ai-line.assistant{align-self:flex-start;background:#eff8fc;border-bottom-left-radius:5px}.oge-ai-status{padding:0 16px;color:#a33143;font-size:13px;min-height:0}.oge-ai-status:not(:empty){padding-bottom:9px}
+    .oge-ai-form{display:flex;align-items:end;gap:8px;padding:12px 14px;border-top:1px solid #eae6f6;flex:0 0 auto;background:#fff}.oge-ai-form textarea{flex:1;min-width:0;min-height:0!important;height:54px!important;max-height:54px!important;resize:none!important;border:1px solid #cac5e8;border-radius:13px!important;padding:9px 12px!important;font:14px/1.3 system-ui,sans-serif!important;box-sizing:border-box}.oge-ai-form button{flex:0 0 auto;height:54px;align-self:end;border:0;border-radius:13px;padding:0 15px;background:#6356d9;color:#fff;font:750 14px system-ui,sans-serif;cursor:pointer}.oge-ai-form button:disabled{opacity:.5;cursor:wait}
+    @media(max-width:600px){.oge-ai-launch{right:12px;bottom:12px}.oge-ai-dialog{right:8px;bottom:76px;width:calc(100vw - 16px);height:min(600px,calc(100dvh - 95px))}}
+  `;
+  document.head.append(style);
+  const launch = document.createElement('button');
+  launch.type = 'button'; launch.className = 'oge-ai-launch'; launch.textContent = '✦ Помощник ОГЭ';
+  launch.setAttribute('aria-label','Открыть помощника ОГЭ');
+  launch.hidden = true;
+  const dialog = document.createElement('section');
+  dialog.className = 'oge-ai-dialog'; dialog.hidden = true;
+  dialog.setAttribute('role','dialog'); dialog.setAttribute('aria-label','Помощник по английскому ОГЭ');
+  dialog.innerHTML = '<div class="oge-ai-head"><div class="oge-ai-title"><span class="oge-ai-avatar" aria-hidden="true">✦</span><span><strong>Помощник ОГЭ</strong><small>Разбираем английский вместе</small></span></div><button class="oge-ai-close" type="button" aria-label="Закрыть">×</button></div><div class="oge-ai-log" role="log" aria-live="polite"></div><div class="oge-ai-status" aria-live="polite"></div><form class="oge-ai-form"><textarea rows="2" maxlength="500" aria-label="Вопрос помощнику" placeholder="Спроси о задании…" required></textarea><button type="submit">Отправить</button></form>';
+  document.body.append(launch,dialog);
+  const log = dialog.querySelector('.oge-ai-log');
+  const status = dialog.querySelector('.oge-ai-status');
+  const form = dialog.querySelector('form');
+  const input = form.querySelector('textarea');
+  const send = form.querySelector('button');
+  let history = [];
+  function updateVisibility() {
+    let teacher = null;
+    try { teacher = JSON.parse(localStorage.getItem('englishup-auth-session') || 'null'); } catch (_) {}
+    let student = null;
+    try { student = JSON.parse(sessionStorage.getItem('englishup-student-session') || 'null'); } catch (_) {}
+    launch.hidden = !teacher?.access_token || Boolean(student?.code);
+    if (launch.hidden) dialog.hidden = true;
+  }
+  updateVisibility();
+  window.addEventListener('storage',updateVisibility);
+  window.addEventListener('focus',updateVisibility);
+  setInterval(updateVisibility,1500);
+
+  function line(role,text) {
+    const item = document.createElement('div');
+    item.className = 'oge-ai-line ' + role;
+    item.textContent = text;
+    log.append(item);
+    log.scrollTop = log.scrollHeight;
+  }
+  line('assistant','Привет! Помогу разобраться с заданием ОГЭ по английскому. Напиши, что непонятно.');
+  launch.onclick = () => { dialog.hidden = !dialog.hidden; if (!dialog.hidden) input.focus(); };
+  dialog.querySelector('.oge-ai-close').onclick = () => { dialog.hidden = true; launch.focus(); };
+  dialog.addEventListener('keydown',event => { if (event.key === 'Escape') { dialog.hidden = true; launch.focus(); } });
+  input.addEventListener('keydown',event => { if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); form.requestSubmit(); } });
+
+  form.onsubmit = async event => {
+    event.preventDefault();
+    const message = input.value.trim();
+    if (!message || send.disabled) return;
+    let teacher;
+    try { teacher = JSON.parse(localStorage.getItem('englishup-auth-session') || 'null'); } catch (_) {}
+    if (!teacher?.access_token) {
+      status.textContent = 'Войди в кабинет учителя.';
+      return;
+    }
+    status.textContent = '';
+    send.disabled = true;
+    line('user',message);
+    input.value = '';
+    try {
+      const response = await fetch('/api/assistant', {
+        method:'POST',headers:{'content-type':'application/json',authorization:'Bearer ' + teacher.access_token},
+        body:JSON.stringify({message,history:history.slice(-6),context:document.querySelector('.module-label')?.textContent?.trim() || 'Разделы ОГЭ'})
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Не удалось получить ответ.');
+      line('assistant',data.answer);
+      history.push({role:'user',text:message},{role:'assistant',text:data.answer});
+      history = history.slice(-6);
+    } catch (error) { status.textContent = error.message || 'Помощник пока недоступен.'; }
+    finally { send.disabled = false; input.focus(); }
+  };
+})();
