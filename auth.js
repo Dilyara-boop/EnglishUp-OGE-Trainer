@@ -41,6 +41,7 @@
         <label>Email<input name="email" type="email" autocomplete="email" required placeholder="name@example.com"></label>
         <label>Пароль<input name="password" type="password" autocomplete="current-password" minlength="6" required placeholder="Не менее 6 символов"></label>
         <button class="englishup-auth-submit" type="submit">Войти</button>
+        <button type="button" data-forgot-password style="border:0;background:none;color:#6259dd;cursor:pointer;margin-top:10px;font-weight:600;">Забыли пароль?</button>
       </form>
       <form class="englishup-auth-form" data-auth-form="student" hidden>
         <label>Код от учителя<input name="code" autocomplete="off" maxlength="20" required placeholder="Введи свой код"></label>
@@ -79,6 +80,7 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
   overlay.querySelectorAll('[data-auth-tab]').forEach(button => button.addEventListener('click', () => selectTab(button.dataset.authTab)));
   overlay.querySelector('[data-auth-form="login"]').addEventListener('submit', login);
+  overlay.querySelector('[data-forgot-password]').addEventListener('click', resetPassword);
   overlay.querySelector('[data-auth-form="signup"]').addEventListener('submit', signup);
   overlay.querySelector('[data-auth-form="student"]').addEventListener('submit', loginStudent);
   overlay.querySelector('[data-student-signout]').addEventListener('click', () => { student = null; sessionStorage.removeItem(STUDENT_KEY); render(); });
@@ -155,6 +157,25 @@
     } catch (error) { showMessage(error.message, 'error'); }
     finally { setBusy(false); }
   }
+  async function resetPassword() {
+  clearMessage();
+
+  const email = prompt('Введите email, на который зарегистрирован аккаунт:');
+  if (!email) return;
+
+  try {
+    await api('/auth/v1/recover', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: email.trim()
+      })
+    });
+
+    showMessage('Письмо для восстановления пароля отправлено на почту.', 'ok');
+  } catch (error) {
+    showMessage(error.message, 'error');
+  }
+}
   async function logout() {
     setBusy(true);
     try { if (session?.access_token) await api('/auth/v1/logout', {method:'POST', headers:{Authorization:'Bearer ' + session.access_token}}); } catch (_) {}
