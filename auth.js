@@ -315,6 +315,40 @@
     api('/rest/v1/rpc/save_student_result', {method:'POST',body:JSON.stringify({input_code:student.code,input_section:result.section,input_variant_number:result.variant,input_score:result.score,input_max_score:result.max})})
       .catch(error => { showMessage('Результат пока не отправлен: ' + error.message, 'error'); });
   };
+  async function handlePasswordRecovery() {
+  const hash = new URLSearchParams(window.location.hash.substring(1));
+
+  if (hash.get('type') !== 'recovery') return;
+
+  const accessToken = hash.get('access_token');
+  if (!accessToken) return;
+
+  const newPassword = prompt('Придумайте новый пароль (не менее 6 символов):');
+  if (!newPassword) return;
+
+  if (newPassword.length < 6) {
+    alert('Пароль должен содержать не менее 6 символов.');
+    return;
+  }
+
+  try {
+    await api('/auth/v1/user', {
+      method: 'PUT',
+      headers: {
+        Authorization: 'Bearer ' + accessToken
+      },
+      body: JSON.stringify({
+        password: newPassword
+      })
+    });
+
+    history.replaceState(null, '', window.location.pathname);
+    alert('Пароль успешно изменён. Теперь войдите с новым паролем.');
+  } catch (error) {
+    alert('Не удалось изменить пароль: ' + error.message);
+  }
+}
+  
   function render() {
     const signedIn = Boolean(session && user && !student);
     const studentIn = Boolean(student && !signedIn);
