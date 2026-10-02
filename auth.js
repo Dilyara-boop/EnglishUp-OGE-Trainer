@@ -379,7 +379,8 @@
     return true;
   }
 
+   handlePasswordRecovery();
   consumeRedirect();
-  render();
+   render();
   fetchUser();
 })();
