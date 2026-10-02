@@ -166,9 +166,10 @@
   try {
     await api('/auth/v1/recover', {
       method: 'POST',
-      body: JSON.stringify({
-        email: email.trim()
-      })
+     body: JSON.stringify({
+  email: email.trim(),
+  redirect_to: 'https://dilyara-boop.github.io/EnglishUp-OGE-Trainer/'
+})
     });
 
     showMessage('Письмо для восстановления пароля отправлено на почту.', 'ok');
