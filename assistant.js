@@ -7,6 +7,9 @@
     .oge-ai-dialog[hidden]{display:none}.oge-ai-head{padding:14px 17px;background:linear-gradient(110deg,#6259dd,#4da1da);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px}.oge-ai-title{display:flex;align-items:center;gap:11px}.oge-ai-avatar{display:grid;place-items:center;width:39px;height:39px;border-radius:13px;background:#ffffff34;font-size:20px}.oge-ai-head strong{display:block;font-size:16px}.oge-ai-head small{display:block;font-size:12px;opacity:.88}.oge-ai-close{width:34px;height:34px;background:#ffffff2b;border:0;border-radius:10px;color:#fff;font-size:23px;line-height:1;cursor:pointer}
     .oge-ai-log{padding:18px;min-height:0;overflow:auto;flex:1;display:flex;flex-direction:column;gap:12px}.oge-ai-line{padding:11px 14px;border-radius:16px;max-width:90%;white-space:pre-wrap;overflow-wrap:anywhere}.oge-ai-line.user{align-self:flex-end;background:#eeeaff;border-bottom-right-radius:5px}.oge-ai-line.assistant{align-self:flex-start;background:#eff8fc;border-bottom-left-radius:5px}.oge-ai-status{padding:0 16px;color:#a33143;font-size:13px;min-height:0}.oge-ai-status:not(:empty){padding-bottom:9px}
     .oge-ai-form{display:flex;align-items:end;gap:8px;padding:12px 14px;border-top:1px solid #eae6f6;flex:0 0 auto;background:#fff}.oge-ai-form textarea{flex:1;min-width:0;min-height:0!important;height:54px!important;max-height:54px!important;resize:none!important;border:1px solid #cac5e8;border-radius:13px!important;padding:9px 12px!important;font:14px/1.3 system-ui,sans-serif!important;box-sizing:border-box}.oge-ai-form button{flex:0 0 auto;height:54px;align-self:end;border:0;border-radius:13px;padding:0 15px;background:#6356d9;color:#fff;font:750 14px system-ui,sans-serif;cursor:pointer}.oge-ai-form button:disabled{opacity:.5;cursor:wait}
+    .oge-ai-quick-actions{display:flex;flex-wrap:wrap;gap:7px;padding:10px 14px 4px;background:#fff}
+    .oge-ai-quick-actions button{border:1px solid #ddd9ff;background:#f7f5ff;color:#4d46a8;border-radius:18px;padding:7px 10px;font-size:12px;font-weight:600;cursor:pointer}
+    .oge-ai-quick-actions button:hover{background:#ebe8ff;transform:translateY(-1px)}
     @media(max-width:600px){.oge-ai-launch{right:12px;bottom:12px}.oge-ai-dialog{right:8px;bottom:76px;width:calc(100vw - 16px);height:min(600px,calc(100dvh - 95px))}}
   `;
   document.head.append(style);
@@ -25,6 +28,24 @@
   const input = form.querySelector('textarea');
   const send = form.querySelector('button');
   let history = [];
+  const quickActions = document.createElement('div');
+quickActions.className = 'oge-ai-quick-actions';
+quickActions.innerHTML = `
+  <button type="button" data-prompt="Объясни мне это задание простыми словами, но не давай готовый ответ: ">📘 Объясни задание</button>
+  <button type="button" data-prompt="Переведи это слово или выражение, объясни его значение и приведи пример: ">🌍 Переведи слово</button>
+  <button type="button" data-prompt="Проверь мой ответ, укажи ошибки и объясни, как их исправить: ">✍️ Проверь мой ответ</button>
+  <button type="button" data-prompt="Потренируй меня по английскому языку в формате ОГЭ. Задавай по одному заданию и жди моего ответа.">🎯 Потренируй меня</button>
+  <button type="button" data-prompt="Мне сложно. Объясни эту тему очень просто и помоги разобраться по шагам: ">💛 Мне сложно</button>
+`;
+
+form.parentNode.insertBefore(quickActions, form);
+
+quickActions.querySelectorAll('button').forEach(button => {
+  button.addEventListener('click', () => {
+    input.value = button.dataset.prompt;
+    input.focus();
+  });
+});
   function updateVisibility() {
     let teacher = null;
     try { teacher = JSON.parse(localStorage.getItem('englishup-auth-session') || 'null'); } catch (_) {}
