@@ -66,7 +66,7 @@
     line('user',message);
     input.value = '';
     try {const response = await fetch('https://dilyara-boop-englishup-oge-trainer-031d.twc1.net/api/assistant', {
-        method:'POST',headers:{'content-type':'application/json',authorization:'Bearer ' + teacher.access_token},
+        method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({message,history:history.slice(-6),context:document.querySelector('.module-label')?.textContent?.trim() || 'Разделы ОГЭ'})
       });
       const data = await response.json();
