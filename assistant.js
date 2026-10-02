@@ -30,7 +30,7 @@
     try { teacher = JSON.parse(localStorage.getItem('englishup-auth-session') || 'null'); } catch (_) {}
     let student = null;
     try { student = JSON.parse(sessionStorage.getItem('englishup-student-session') || 'null'); } catch (_) {}
-    launch.hidden = !teacher?.access_token || Boolean(student?.code);
+    launch.hidden = !teacher?.access_token && !student?.code;
     if (launch.hidden) dialog.hidden = true;
   }
   updateVisibility();
