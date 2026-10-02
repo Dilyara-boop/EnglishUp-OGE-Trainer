@@ -30,13 +30,28 @@
   let history = [];
   const quickActions = document.createElement('div');
 quickActions.className = 'oge-ai-quick-actions';
-quickActions.innerHTML = `
-  <button type="button" data-prompt="Объясни мне это задание простыми словами, но не давай готовый ответ: ">📘 Объясни задание</button>
-  <button type="button" data-prompt="Переведи это слово или выражение, объясни его значение и приведи пример: ">🌍 Переведи слово</button>
-  <button type="button" data-prompt="Проверь мой ответ, укажи ошибки и объясни, как их исправить: ">✍️ Проверь мой ответ</button>
-  <button type="button" data-prompt="Потренируй меня по английскому языку в формате ОГЭ. Задавай по одному заданию и жди моего ответа.">🎯 Потренируй меня</button>
-  <button type="button" data-prompt="Мне сложно. Объясни эту тему очень просто и помоги разобраться по шагам: ">💛 Мне сложно</button>
-`;
+let currentTeacher = null;
+try {
+  currentTeacher = JSON.parse(localStorage.getItem('englishup-auth-session') || 'null');
+} catch (_) {}
+
+if (currentTeacher?.access_token) {
+  quickActions.innerHTML = `
+    <button type="button" data-prompt="Создай задание в формате ОГЭ по английскому языку по теме: ">📝 Создай задание</button>
+    <button type="button" data-prompt="Проверь ответ ученика. Укажи ошибки, объясни их и предложи исправленный вариант: ">✅ Проверь ответ</button>
+    <button type="button" data-prompt="Проанализируй ошибки ученика, определи слабые темы и предложи, что нужно повторить: ">📊 Разбери ошибки</button>
+    <button type="button" data-prompt="Составь план занятия по английскому языку с подготовкой к ОГЭ по теме: ">🎓 План урока</button>
+    <button type="button" data-prompt="Объясни эту тему простыми словами так, чтобы я могла объяснить её ученику: ">💡 Объясни тему</button>
+  `;
+} else {
+  quickActions.innerHTML = `
+    <button type="button" data-prompt="Объясни мне это задание простыми словами, но не давай готовый ответ: ">📘 Объясни задание</button>
+    <button type="button" data-prompt="Переведи это слово или выражение, объясни его значение и приведи пример: ">🌍 Переведи слово</button>
+    <button type="button" data-prompt="Проверь мой ответ, укажи ошибки и объясни, как их исправить: ">✍️ Проверь мой ответ</button>
+    <button type="button" data-prompt="Потренируй меня по английскому языку в формате ОГЭ. Задавай по одному заданию и жди моего ответа.">🎯 Потренируй меня</button>
+    <button type="button" data-prompt="Мне сложно. Объясни эту тему очень просто и помоги разобраться по шагам: ">💛 Мне сложно</button>
+  `;
+}
 
 form.parentNode.insertBefore(quickActions, form);
 
