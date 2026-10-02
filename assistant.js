@@ -55,12 +55,15 @@
     event.preventDefault();
     const message = input.value.trim();
     if (!message || send.disabled) return;
-    let teacher;
-    try { teacher = JSON.parse(localStorage.getItem('englishup-auth-session') || 'null'); } catch (_) {}
-    if (!teacher?.access_token) {
-      status.textContent = 'Войди в кабинет учителя.';
-      return;
-    }
+  let teacher = null;
+let student = null;
+try { teacher = JSON.parse(localStorage.getItem('englishup-auth-session') || 'null'); } catch (_) {}
+try { student = JSON.parse(sessionStorage.getItem('englishup-student-session') || 'null'); } catch (_) {}
+
+if (!teacher?.access_token && !student?.code) {
+  status.textContent = 'Сначала войди в аккаунт.';
+  return;
+}
     status.textContent = '';
     send.disabled = true;
     line('user',message);
