@@ -56,6 +56,7 @@
       <div class="englishup-auth-message" aria-live="polite"></div>
       <div class="englishup-profile" hidden>
         <div class="englishup-profile-box"><strong data-profile-name></strong><span data-profile-email></span><span class="englishup-role" data-profile-role></span></div>
+       <button type="button" data-change-password class="englishup-secondary-btn">🔐 Сменить пароль</button>
         <form class="englishup-auth-form" data-role-form><label>Роль в тренажёре<select name="role"><option value="student">Ученик</option><option value="teacher">Учитель</option></select></label><button class="englishup-auth-submit" type="submit">Сохранить роль</button></form>
         <section class="englishup-teacher" hidden>
           <h3>Мои ученики</h3>
@@ -81,6 +82,7 @@
   overlay.querySelectorAll('[data-auth-tab]').forEach(button => button.addEventListener('click', () => selectTab(button.dataset.authTab)));
   overlay.querySelector('[data-auth-form="login"]').addEventListener('submit', login);
   overlay.querySelector('[data-forgot-password]').addEventListener('click', resetPassword);
+  overlay.querySelector('[data-change-password]').addEventListener('click', changePassword);
   overlay.querySelector('[data-auth-form="signup"]').addEventListener('submit', signup);
   overlay.querySelector('[data-auth-form="student"]').addEventListener('submit', loginStudent);
   overlay.querySelector('[data-student-signout]').addEventListener('click', () => { student = null; sessionStorage.removeItem(STUDENT_KEY); render(); });
@@ -157,6 +159,40 @@
     } catch (error) { showMessage(error.message, 'error'); }
     finally { setBusy(false); }
   }
+  async function changePassword() {
+  const newPassword = prompt('Введите новый пароль (минимум 6 символов):');
+  if (!newPassword) return;
+
+  if (newPassword.length < 6) {
+    alert('Пароль должен содержать минимум 6 символов.');
+    return;
+  }
+
+  const currentSession = JSON.parse(
+    localStorage.getItem('englishup-auth-session') || 'null'
+  );
+
+  if (!currentSession?.access_token) {
+    alert('Сначала войдите в аккаунт.');
+    return;
+  }
+
+  try {
+    await api('/auth/v1/user', {
+      method: 'PUT',
+      headers: {
+        Authorization: 'Bearer ' + currentSession.access_token
+      },
+      body: JSON.stringify({
+        password: newPassword
+      })
+    });
+
+    alert('Пароль успешно изменён!');
+  } catch (error) {
+    alert('Не удалось изменить пароль: ' + error.message);
+  }
+}
   async function resetPassword() {
   clearMessage();
 
