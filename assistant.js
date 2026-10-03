@@ -35,7 +35,7 @@ try {
   currentTeacher = JSON.parse(localStorage.getItem('englishup-auth-session') || 'null');
 } catch (_) {}
 
-if (currentTeacher?.access_token) {
+if (currentTeacher?.access_token && currentTeacher?.user?.user_metadata?.role === 'teacher') {
   quickActions.innerHTML = `
     <button type="button" data-prompt="Создай задание в формате ОГЭ по английскому языку по теме: ">📝 Создай задание</button>
     <button type="button" data-prompt="Проверь ответ ученика. Укажи ошибки, объясни их и предложи исправленный вариант: ">✅ Проверь ответ</button>
