@@ -15,7 +15,17 @@ const achievementsScreen=document.createElement('main');achievementsScreen.class
 const achievementsEntry=document.createElement('button');achievementsEntry.className='achievements-entry';achievementsEntry.innerHTML='<span><strong>🏆 Мои достижения</strong><span>Награды за тренировки и пробные варианты</span></span><b id="homeAchievementCount">0 / 10</b>';home.appendChild(achievementsEntry);
 
 function mockSectionValue(n,part){const teacher=part==='letter'?localStorage.getItem('oge-mock-'+n+'-letter-teacher'):part==='speaking'?localStorage.getItem('oge-mock-'+n+'-speaking-teacher'):null;if(teacher!==null)return Number(teacher);const key=part==='letter'?'letter-precheck':part==='speaking'?'speaking-precheck':part;const value=localStorage.getItem('oge-mock-'+n+'-'+key);return value===null?null:Number(value)}
-function getAchievementData(){const d=getProgressData(),trainingDone=d.completed.reduce((a,b)=>a+b,0),trainingTotal=d.available.reduce((a,b)=>a+b,0),fullTrainingSections=d.completed.filter((x,i)=>x>=d.available[i]).length,mockParts=['listening','reading','grammar','letter','speaking'],mockRows=[];for(let n=1;n<=10;n++){const values=mockParts.map(p=>mockSectionValue(n,p)),done=values.filter(v=>v!==null).length,total=values.reduce((s,v)=>s+(v===null?0:v),0);mockRows.push({n,values,done,total,complete:done===5})}const completed=mockRows.filter(x=>x.complete),best=completed.length?Math.max(...completed.map(x=>x.total)):0,uniqueScores=new Set(completed.map(x=>x.total)),anyMockPart=mockRows.some(x=>x.done>0);const items=[
+function getCurrentStudent() {
+  try {
+    return JSON.parse(sessionStorage.getItem('englishup-student-session') || 'null');
+  } catch (_) {
+    return null;
+  }
+}
+function getAchievementData(){
+ const currentStudent = getCurrentStudent();
+ const studentId = currentStudent?.id || null;
+ const d=getProgressData(studentId),trainingDone=d.completed.reduce((a,b)=>a+b,0),trainingTotal=d.available.reduce((a,b)=>a+b,0),fullTrainingSections=d.completed.filter((x,i)=>x>=d.available[i]).length,mockParts=['listening','reading','grammar','letter','speaking'],mockRows=[];for(let n=1;n<=10;n++){const values=mockParts.map(p=>mockSectionValue(n,p)),done=values.filter(v=>v!==null).length,total=values.reduce((s,v)=>s+(v===null?0:v),0);mockRows.push({n,values,done,total,complete:done===5})}const completed=mockRows.filter(x=>x.complete),best=completed.length?Math.max(...completed.map(x=>x.total)):0,uniqueScores=new Set(completed.map(x=>x.total)),anyMockPart=mockRows.some(x=>x.done>0);const items=[
 {icon:'🌱',title:'Первый шаг',text:'Выполнить первую тренировку.',ok:trainingDone>=1,state:trainingDone>=1?'Получено':'Начни любую тренировку'},
 {icon:'⚡',title:'Половина пути',text:'Пройти не менее половины всех тренировок.',ok:trainingDone>=Math.ceil(trainingTotal/2),state:trainingDone+' из '+trainingTotal},
 {icon:'🎯',title:'Раздел закрыт',text:'Полностью пройти один тренировочный раздел.',ok:fullTrainingSections>=1,state:fullTrainingSections+' из 5 разделов'},
