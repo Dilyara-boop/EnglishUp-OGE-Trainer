@@ -340,6 +340,7 @@
     match = /^oge-(reading|listen)-best-(?:[^-]+-)?(\d+)$/.exec(key);
     if (match) return {section:match[1] === 'listen' ? 'listening' : 'reading', variant:Number(match[2])+1, score:Number(value), max:5};
     if (key === 'oge-grammar-best') return {section:'grammar',variant:0,score:Number(value),max:10};
+    if (/^oge-mock-(\d+)-total$/.test(key)) { const m=/^oge-mock-(\d+)-total$/.exec(key); return {section:'mock',variant:Number(m[1]),score:Number(value),max:68}; }
     return null;
   }
   const originalSetItem = Storage.prototype.setItem;
