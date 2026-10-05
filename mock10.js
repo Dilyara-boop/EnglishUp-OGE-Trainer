@@ -56,3 +56,8 @@ function testCompleteMock1() {
 }
 const previousRenderMockHubV10=renderMockHub;
 renderMockHub=function(){previousRenderMockHubV10();const badge=mockScreen.querySelector('.score-badge strong');if(badge)badge.textContent='10 / 10';let card=document.getElementById('openMockV10');if(!card){const locked=mockScreen.querySelector('.mock-variant-card.locked');if(locked){card=document.createElement('button');card.className='mock-variant-card ready';card.id='openMockV10';locked.replaceWith(card)}}if(card){const keys=['listening','reading','grammar','letter-precheck','speaking-precheck'],done=keys.filter(k=>localStorage.getItem('oge-mock-10-'+k)!==null).length;card.innerHTML='<span class="mock-variant-number">10</span><h2>Вариант №10</h2><p>Все пять разделов и итоговый отчёт.</p><span class="mock-variant-state">'+done+' из 5 разделов</span>';card.onclick=renderMock10Listening;if(done===5&&!document.getElementById('allMocksReward')){const reward=document.createElement('div');reward.id='allMocksReward';reward.className='mock-score-note';reward.innerHTML='<b>🏆 Мастер пробного ОГЭ</b><br>Все 10 вариантов открыты, а финальный вариант полностью выполнен.';card.parentElement.appendChild(reward)}}};
+const testMockButton = document.createElement('button');
+testMockButton.textContent = '🧪 Тест пробника №1';
+testMockButton.style.cssText = 'position:fixed;left:20px;bottom:20px;z-index:99999;padding:12px 18px;background:#6c5ce7;color:white;border:0;border-radius:12px;font-weight:bold;cursor:pointer;';
+testMockButton.onclick = testCompleteMock1;
+document.body.appendChild(testMockButton);
