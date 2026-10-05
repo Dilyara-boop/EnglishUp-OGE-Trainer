@@ -1282,20 +1282,4 @@ function saveMock9TeacherScores(){[['mock9LetterTeacher','oge-mock-9-letter-teac
 function connectMock9Navigation(){const buttons=mockScreen.querySelectorAll('.variant2-nav button'),screens=[renderMock9Listening,renderMock9Reading,renderMock9Grammar,renderMock9Letter,renderMock9Speaking];buttons.forEach((button,index)=>{button.disabled=false;if(!button.classList.contains('active')&&screens[index])button.onclick=screens[index]})}
 const previousRenderMockHubV9Complete=renderMockHub;
 renderMockHub=function(){previousRenderMockHubV9Complete();const badge=mockScreen.querySelector('.score-badge strong');if(badge)badge.textContent='9 / 10';const card=document.getElementById('openMockV9');if(card){const done=['listening','reading','grammar','letter-precheck','speaking-precheck'].filter(k=>localStorage.getItem('oge-mock-9-'+k)!==null).length;card.querySelector('p').textContent='Все пять разделов и итоговый отчёт.';card.querySelector('.mock-variant-state').textContent=done+' из 5 разделов';card.classList.remove('building');card.classList.add('ready')}};
-</script>
-  <button id="testMock1Button"
-style="position:fixed;left:20px;bottom:20px;z-index:99999;padding:12px 18px;background:#6c5ce7;color:white;border:0;border-radius:12px;font-weight:bold;cursor:pointer;">
-🧪 Тест пробника №1
-</button>
-
-<script>
-document.getElementById('testMock1Button').onclick = function () {
-  localStorage.setItem('oge-mock-1-listening', '15');
-  localStorage.setItem('oge-mock-1-reading', '13');
-  localStorage.setItem('oge-mock-1-grammar', '12');
-  localStorage.setItem('oge-mock-1-letter-teacher', '8');
-  localStorage.setItem('oge-mock-1-speaking-teacher', '12');
-  alert('Тестовый пробник №1 записан');
-};
-</script>
-  <script src="mock10.js"></script><script src="achievements.js"></script><script src="auth.js"></script><script src="assistant.js"></script></body></html>
+<script src="mock10.js"></script><script src="achievements.js"></script><script src="auth.js"></script><script src="assistant.js"></script></body></html>
