@@ -81,6 +81,25 @@ body{background:radial-gradient(circle at 8% 12%,#daf5ff 0,transparent 30%),radi
 .mock-cta button {
   position: static !important;
   margin: 0 !important;
+.mock-entry {
+  height: auto !important;
+  min-height: 0 !important;
+  padding: 20px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  gap: 14px !important;
+}
+
+.mock-entry > span {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 6px !important;
+}
+
+.mock-entry > b {
+  position: static !important;
+  margin: 0 !important;
 } 
 }
 </style></head><body><div class="app"><header class="topbar"><div class="topbar-inner"><div class="brand"><span class="brand-mark">UP</span><span>English OGE Trainer</span></div><span class="module-label">Модуль 1 · Электронное письмо</span></div></header><main class="shell"><section class="intro"><div><div class="eyebrow">Практика на уроке</div><h1>Напиши электронное письмо</h1><p>Прочитай письмо Бена, ответь на три вопроса и проверь свою работу.</p></div><aside class="timer-card" aria-label="Таймер"><div class="timer-title">Время на выполнение</div><div class="timer-row"><span class="timer" id="timer">30:00</span><div class="timer-actions"><button class="icon-btn" id="timerToggle" aria-label="Запустить таймер">▶</button><button class="icon-btn" id="timerReset" aria-label="Сбросить таймер">↺</button></div></div></aside></section><div class="grid"><section class="card"><div class="card-head"><div class="card-title"><span class="step">1</span> Прочитай задание</div><span class="tag">Вариант 1</span></div><div class="task"><div class="email-box"><p><strong>From:</strong> Ben@mail.uk<br><strong>To:</strong> Russian_friend@oge.ru<br><strong>Subject:</strong> Hobbies</p><p>…I’ve recently started learning to play the guitar. It’s not easy, but I really enjoy it.</p><p>What hobbies are popular among teenagers in Russia? What is your favourite hobby and why? How much time do you spend on it?</p><p>Write a message to Ben and answer his 3 questions.</p></div><div class="rule"><strong>Важно</strong>Соблюдай требуемый в задании объём и не забудь ответить на все три вопроса.</div></div><div class="helper"><details><summary>Полезные фразы</summary><div class="phrases"><span class="phrase">Dear Ben,</span><span class="phrase">Thanks for your email.</span><span class="phrase">You asked me about…</span><span class="phrase">As for me,…</span><span class="phrase">Write back soon.</span><span class="phrase">Best wishes,</span></div></details><details><summary>Чек-лист перед проверкой</summary><ul><li>Есть обращение и благодарность за письмо.</li><li>Даны ответы на все три вопроса.</li><li>Есть завершающая фраза и имя.</li><li>Проверены грамматика и орфография.</li></ul></details></div></section><section class="card"><div class="card-head"><div class="card-title"><span class="step">2</span> Напиши ответ</div><span class="tag">Черновик сохраняется</span></div><div class="workspace"><label class="field-label" for="studentName">Имя ученика</label><input class="student-name" id="studentName" autocomplete="name" placeholder="Например, Алина"><label class="field-label" for="answer"><span>Твой ответ на английском</span><span class="counter" id="counter">0 слов</span></label><textarea id="answer" spellcheck="true" placeholder="Dear Ben,&#10;&#10;Thanks for your email..."></textarea><div class="actions"><button class="btn btn-primary" id="checkBtn">Проверить письмо</button><button class="btn btn-secondary" id="sampleBtn">Показать образец</button><button class="btn btn-ghost" id="clearBtn">Очистить</button></div><div class="result" id="result" aria-live="polite"></div><div class="sample" id="sample"><h3>Пример ответа</h3><div class="sample-text">Dear Ben,
