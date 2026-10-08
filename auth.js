@@ -58,6 +58,7 @@
         <div class="englishup-profile-box"><strong data-profile-name></strong><span data-profile-email></span><span class="englishup-role" data-profile-role></span></div>
        <button type="button" data-change-password class="englishup-secondary-btn">🔐 Сменить пароль</button>
         <form class="englishup-auth-form" data-role-form><label>Роль в тренажёре<select name="role"><option value="student">Ученик</option><option value="teacher">Учитель</option></select></label><button class="englishup-auth-submit" type="submit">Сохранить роль</button></form>
+        <section class="englishup-account-results" hidden><h3>Мои результаты</h3><div data-account-results>Загрузка…</div></section>
         <section class="englishup-teacher" hidden>
           <h3>Мои ученики</h3>
           <form class="englishup-auth-form" data-student-form><label>Имя ученика<input name="name" maxlength="80" required placeholder="Например, Алина"></label><button class="englishup-auth-submit" type="submit">Добавить ученика</button></form>
@@ -320,48 +321,62 @@
     const labels = {listening:'Аудирование',reading:'Чтение',grammar:'Грамматика',letter:'Письмо (самопроверка)',speaking:'Говорение (самопроверка)'};
     return labels[section] || section;
   }
-  // Teacher accounts store their own scores separately from pupils using access codes.
-  async function saveAccountResult(result) {
-    if (!session?.access_token || !user?.id || student?.code) return;
+  // Results of email/password accounts are private to their Supabase user ID.
+  async function saveAccountScore(section, variant, score, max) {
+    if (!session?.access_token || !user?.id) throw new Error('Сначала войди в аккаунт.');
+    const row = {user_id:user.id, section, variant_number:Number(variant), score:Number(score), max_score:Number(max)};
     await api('/rest/v1/account_results?on_conflict=user_id,section,variant_number', {
-      method: 'POST',
-      headers: {
-        Authorization: 'Bearer ' + session.access_token,
-        Prefer: 'resolution=merge-duplicates,return=minimal'
-      },
-      body: JSON.stringify({
-        user_id: user.id,
-        section: result.section,
-        variant_number: result.variant,
-        score: result.score,
-        max_score: result.max,
-        updated_at: new Date().toISOString()
-      })
+      method:'POST',
+      headers:{Authorization:'Bearer ' + session.access_token, Prefer:'resolution=merge-duplicates,return=minimal'},
+      body:JSON.stringify(row)
     });
   }
-
-  window.englishupSaveScore = async function(section, variant, score, max, status) {
-    if (!student?.code && session?.access_token && user?.id) {
-      try {
-        await saveAccountResult({section, variant, score, max});
-        if (status) status.textContent = 'Результат сохранён в твоём аккаунте.';
-      } catch (error) {
-        if (status) status.textContent = 'Не удалось сохранить результат: ' + error.message;
-        showMessage('Не удалось сохранить результат: ' + error.message, 'error');
-      }
-      return;
-    }
-    if (!student?.code) {
-      if (status) status.textContent = 'Для отправки балла войди по коду ученика.';
-      return;
-    }
-    if (status) status.textContent = 'Сохраняем результат Алины…'.replace('Алины', student.name);
+  async function loadAccountResults() {
+    const box = overlay.querySelector('[data-account-results]');
+    if (!box || !session?.access_token || !user?.id) return;
+    box.textContent = 'Загрузка результатов…';
     try {
-      await api('/rest/v1/rpc/save_student_result', {method:'POST', body:JSON.stringify({input_code:student.code,input_section:section,input_variant_number:variant,input_score:score,input_max_score:max})});
-      if (status) status.textContent = 'Результат сохранён для ' + student.name + '. Учитель увидит его в кабинете.';
+      const rows = await api('/rest/v1/account_results?select=section,variant_number,score,max_score,updated_at&user_id=eq.' + encodeURIComponent(user.id) + '&order=updated_at.desc&limit=100', {
+        headers:{Authorization:'Bearer ' + session.access_token}
+      });
+      box.replaceChildren();
+      if (!rows.length) { box.textContent = 'Пока нет сохранённых результатов.'; return; }
+      const list = document.createElement('ul');
+      list.style.cssText = 'padding-left:20px;max-height:240px;overflow:auto';
+      rows.forEach(row => {
+        const item = document.createElement('li');
+        item.style.marginBottom = '9px';
+        const label = sectionTitle(row.section) + (row.variant_number ? ', вариант ' + row.variant_number : ', общая тренировка');
+        item.textContent = label + ' — ' + row.score + ' / ' + row.max_score;
+        if (row.updated_at) {
+          const date = document.createElement('small');
+          date.style.cssText = 'display:block;color:#727995';
+          date.textContent = new Date(row.updated_at).toLocaleString('ru-RU');
+          item.append(date);
+        }
+        list.append(item);
+      });
+      box.append(list);
+    } catch (error) { box.textContent = 'Не удалось загрузить результаты: ' + error.message; }
+  }
+  window.englishupSaveScore = async function(section, variant, score, max, status) {
+    if (!student?.code && !(session?.access_token && user?.id)) {
+      if (status) status.textContent = 'Для сохранения результата войди в аккаунт или по коду ученика.';
+      return;
+    }
+    if (status) status.textContent = 'Сохраняем результат…';
+    try {
+      if (student?.code) {
+        await api('/rest/v1/rpc/save_student_result', {method:'POST', body:JSON.stringify({input_code:student.code,input_section:section,input_variant_number:variant,input_score:score,input_max_score:max})});
+        if (status) status.textContent = 'Результат сохранён для ' + student.name + '. Учитель увидит его в кабинете.';
+      } else {
+        await saveAccountScore(section, variant, score, max);
+        if (status) status.textContent = 'Результат сохранён в личном кабинете.';
+        if (overlay.classList.contains('open')) loadAccountResults();
+      }
     } catch (error) {
-      if (status) status.textContent = 'Не удалось отправить результат: ' + error.message;
-      showMessage('Не удалось отправить результат: ' + error.message, 'error');
+      if (status) status.textContent = 'Не удалось сохранить результат: ' + error.message;
+      showMessage('Не удалось сохранить результат: ' + error.message, 'error');
     }
   };
   function scoreMeta(key, value) {
@@ -369,6 +384,8 @@
     if (match) return {section:match[2].replace('-precheck',''), variant:Number(match[1]), score:Number(value), max:{listening:15,reading:13,grammar:15,letter:10,speaking:15}[match[2].replace('-precheck','')]};
     match = /^oge-(reading|listen)-best-(?:[^-]+-)?(\d+)$/.exec(key);
     if (match) return {section:match[1] === 'listen' ? 'listening' : 'reading', variant:Number(match[2])+1, score:Number(value), max:5};
+    match = /^oge-grammar-best-(\d+)$/.exec(key);
+    if (match) return {section:'grammar',variant:Number(match[1])+1,score:Number(value),max:10};
     if (key === 'oge-grammar-best') return {section:'grammar',variant:0,score:Number(value),max:10};
     if (/^oge-mock-(\d+)-total$/.test(key)) { const m=/^oge-mock-(\d+)-total$/.exec(key); return {section:'mock',variant:Number(m[1]),score:Number(value),max:68}; }
     return null;
@@ -376,16 +393,15 @@
   const originalSetItem = Storage.prototype.setItem;
   Storage.prototype.setItem = function(key, value) {
     originalSetItem.call(this, key, value);
-    if (this !== localStorage) return;
+    if (this !== localStorage || (!student?.code && !(session?.access_token && user?.id))) return;
     const result = scoreMeta(String(key), value);
     if (!result || !Number.isFinite(result.score) || result.score < 0 || result.score > result.max) return;
-    if (student?.code) {
-      api('/rest/v1/rpc/save_student_result', {method:'POST',body:JSON.stringify({input_code:student.code,input_section:result.section,input_variant_number:result.variant,input_score:result.score,input_max_score:result.max})})
-        .catch(error => { showMessage('Результат пока не отправлен: ' + error.message, 'error'); });
-    } else if (session?.access_token && user?.id) {
-      saveAccountResult(result)
-        .catch(error => { showMessage('Не удалось сохранить баллы в аккаунте: ' + error.message, 'error'); });
-    }
+    // The grammar screen already sends its score explicitly; avoid a duplicate request.
+    if (/^oge-grammar-best-\d+$/.test(String(key))) return;
+    const request = student?.code
+      ? api('/rest/v1/rpc/save_student_result', {method:'POST',body:JSON.stringify({input_code:student.code,input_section:result.section,input_variant_number:result.variant,input_score:result.score,input_max_score:result.max})})
+      : saveAccountScore(result.section, result.variant, result.score, result.max);
+    request.catch(error => { showMessage('Результат пока не отправлен: ' + error.message, 'error'); });
   };
   async function handlePasswordRecovery() {
   const hash = new URLSearchParams(window.location.hash.substring(1));
@@ -442,6 +458,9 @@
     const teacher = profile.querySelector('.englishup-teacher');
     teacher.hidden = metadata.role !== 'teacher';
     if (!teacher.hidden) loadStudents();
+    const accountResults = profile.querySelector('.englishup-account-results');
+    accountResults.hidden = false;
+    if (overlay.classList.contains('open')) loadAccountResults();
   }
   function consumeRedirect() {
     const params = new URLSearchParams(location.hash.replace(/^#/, ''));
