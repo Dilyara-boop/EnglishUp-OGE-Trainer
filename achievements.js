@@ -12,7 +12,7 @@ achievementStyles.textContent=`
 `;
 document.head.appendChild(achievementStyles);
 const achievementsScreen=document.createElement('main');achievementsScreen.className='achievements-screen';document.querySelector('.app').appendChild(achievementsScreen);
-const achievementsEntry=document.createElement('button');achievementsEntry.className='achievements-entry';achievementsEntry.innerHTML='<span><strong>🏆 Мои достижения</strong><span>Награды за тренировки и пробные варианты</span></span><b id="homeAchievementCount">0 / 10</b>';home.appendChild(achievementsEntry);
+const achievementsEntry=document.createElement('button');achievementsEntry.className='achievements-entry';achievementsEntry.innerHTML='<span><strong>🏆 Мои достижения</strong><span>Награды за тренировки и пробные варианты</span></span><b id="homeAchievementCount" style="display:block;width:max-content;margin:12px auto 0;padding:12px 28px;border-radius:16px;background:#fff4df;color:#633600;font-size:28px;font-weight:900;text-align:center;">0 / 10</b>';home.appendChild(achievementsEntry);
 
 function mockSectionValue(n,part){const teacher=part==='letter'?localStorage.getItem('oge-mock-'+n+'-letter-teacher'):part==='speaking'?localStorage.getItem('oge-mock-'+n+'-speaking-teacher'):null;if(teacher!==null)return Number(teacher);const key=part==='letter'?'letter-precheck':part==='speaking'?'speaking-precheck':part;const value=localStorage.getItem('oge-mock-'+n+'-'+key);return value===null?null:Number(value)}
 function getCurrentStudent() {
