@@ -320,7 +320,37 @@
     const labels = {listening:'Аудирование',reading:'Чтение',grammar:'Грамматика',letter:'Письмо (самопроверка)',speaking:'Говорение (самопроверка)'};
     return labels[section] || section;
   }
+  // Teacher accounts store their own scores separately from pupils using access codes.
+  async function saveAccountResult(result) {
+    if (!session?.access_token || !user?.id || student?.code) return;
+    await api('/rest/v1/account_results?on_conflict=user_id,section,variant_number', {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer ' + session.access_token,
+        Prefer: 'resolution=merge-duplicates,return=minimal'
+      },
+      body: JSON.stringify({
+        user_id: user.id,
+        section: result.section,
+        variant_number: result.variant,
+        score: result.score,
+        max_score: result.max,
+        updated_at: new Date().toISOString()
+      })
+    });
+  }
+
   window.englishupSaveScore = async function(section, variant, score, max, status) {
+    if (!student?.code && session?.access_token && user?.id) {
+      try {
+        await saveAccountResult({section, variant, score, max});
+        if (status) status.textContent = 'Результат сохранён в твоём аккаунте.';
+      } catch (error) {
+        if (status) status.textContent = 'Не удалось сохранить результат: ' + error.message;
+        showMessage('Не удалось сохранить результат: ' + error.message, 'error');
+      }
+      return;
+    }
     if (!student?.code) {
       if (status) status.textContent = 'Для отправки балла войди по коду ученика.';
       return;
@@ -346,11 +376,16 @@
   const originalSetItem = Storage.prototype.setItem;
   Storage.prototype.setItem = function(key, value) {
     originalSetItem.call(this, key, value);
-    if (this !== localStorage || !student?.code) return;
+    if (this !== localStorage) return;
     const result = scoreMeta(String(key), value);
     if (!result || !Number.isFinite(result.score) || result.score < 0 || result.score > result.max) return;
-    api('/rest/v1/rpc/save_student_result', {method:'POST',body:JSON.stringify({input_code:student.code,input_section:result.section,input_variant_number:result.variant,input_score:result.score,input_max_score:result.max})})
-      .catch(error => { showMessage('Результат пока не отправлен: ' + error.message, 'error'); });
+    if (student?.code) {
+      api('/rest/v1/rpc/save_student_result', {method:'POST',body:JSON.stringify({input_code:student.code,input_section:result.section,input_variant_number:result.variant,input_score:result.score,input_max_score:result.max})})
+        .catch(error => { showMessage('Результат пока не отправлен: ' + error.message, 'error'); });
+    } else if (session?.access_token && user?.id) {
+      saveAccountResult(result)
+        .catch(error => { showMessage('Не удалось сохранить баллы в аккаунте: ' + error.message, 'error'); });
+    }
   };
   async function handlePasswordRecovery() {
   const hash = new URLSearchParams(window.location.hash.substring(1));
