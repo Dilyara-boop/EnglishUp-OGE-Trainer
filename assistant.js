@@ -30,56 +30,32 @@
   let history = [];
   const quickActions = document.createElement('div');
 quickActions.className = 'oge-ai-quick-actions';
-const teacherButtons = `
+function renderActions() {
+let currentTeacher = null;
+try { currentTeacher = JSON.parse(localStorage.getItem('englishup-auth-session') || 'null'); } catch (_) {}
+const isTeacher = currentTeacher?.access_token && currentTeacher?.user?.user_metadata?.role === 'teacher';
+if (isTeacher) {
+  quickActions.innerHTML = `
     <button type="button" data-prompt="Создай задание в формате ОГЭ по английскому языку по теме: ">📝 Создай задание</button>
-    <button type="button" data-prompt="Проверь ответ ученика по критериям ОГЭ. Укажи ошибки и рекомендации. Ответ: ">✅ Проверь ответ</button>
-    <button type="button" data-prompt="Проанализируй приведённые мной ошибки ученика и предложи план работы: ">📊 Разбери ошибки</button>
-    <button type="button" data-prompt="Составь план урока по подготовке к ОГЭ на тему: ">🎓 План урока</button>
-    <button type="button" data-prompt="Объясни методику преподавания темы: ">💡 Методика</button>`;
-const studentButtons = `
+    <button type="button" data-prompt="Проверь ответ ученика. Укажи ошибки, объясни их и предложи исправленный вариант: ">✅ Проверь ответ</button>
+    <button type="button" data-prompt="Проанализируй ошибки ученика, определи слабые темы и предложи, что нужно повторить: ">📊 Разбери ошибки</button>
+    <button type="button" data-prompt="Составь план занятия по английскому языку с подготовкой к ОГЭ по теме: ">🎓 План урока</button>
+    <button type="button" data-prompt="Объясни эту тему простыми словами так, чтобы я могла объяснить её ученику: ">💡 Объясни тему</button>
+  `;
+} else {
+  quickActions.innerHTML = `
     <button type="button" data-prompt="Объясни мне это задание простыми словами, но не давай готовый ответ: ">📘 Объясни задание</button>
-    <button type="button" data-prompt="Переведи слово и приведи пример: ">🌍 Переведи слово</button>
-    <button type="button" data-prompt="Проверь мой ответ и объясни ошибки: ">✍️ Проверь ответ</button>
-    <button type="button" data-prompt="Потренируй меня по английскому языку в формате ОГЭ. Задавай по одному заданию.">🎯 Тренировка</button>
-    <button type="button" data-prompt="Мне сложно. Помоги разобраться по шагам: ">💛 Мне сложно</button>`;
-let currentMode = '';
-let roleCheckPending = null;
-const SUPABASE_URL = 'https://hwggubjyeavxgyoqqelw.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_6EzzcMnrKlFWXkVaSP3jzA_gV9Eq5tT';
-function getSessions() {
-  let account = null, student = null;
-  try { account = JSON.parse(localStorage.getItem('englishup-auth-session') || 'null'); } catch (_) {}
-  try { student = JSON.parse(sessionStorage.getItem('englishup-student-session') || 'null'); } catch (_) {}
-  return {account, student};
+    <button type="button" data-prompt="Переведи это слово или выражение, объясни его значение и приведи пример: ">🌍 Переведи слово</button>
+    <button type="button" data-prompt="Проверь мой ответ, укажи ошибки и объясни, как их исправить: ">✍️ Проверь мой ответ</button>
+    <button type="button" data-prompt="Потренируй меня по английскому языку в формате ОГЭ. Задавай по одному заданию и жди моего ответа.">🎯 Потренируй меня</button>
+    <button type="button" data-prompt="Мне сложно. Объясни эту тему очень просто и помоги разобраться по шагам: ">💛 Мне сложно</button>
+  `;
 }
-async function resolveMode() {
-  const {account, student} = getSessions();
-  if (student?.code) return 'student';
-  if (!account?.access_token) return '';
-  try {
-    const response = await fetch(SUPABASE_URL + '/auth/v1/user', {
-      headers: {apikey: SUPABASE_KEY, Authorization: 'Bearer ' + account.access_token}
-    });
-    if (!response.ok) return '';
-    const profile = await response.json();
-    return profile?.user_metadata?.role === 'teacher' ? 'teacher' : 'student';
-  } catch (_) { return ''; }
+
+dialog.querySelector('.oge-ai-head strong').textContent = isTeacher ? 'ИИ-помощник учителя' : 'Помощник ОГЭ';
+dialog.querySelector('.oge-ai-head small').textContent = isTeacher ? 'Задания, проверка и планы уроков' : 'Разбираем английский вместе';
 }
-function setMode(mode) {
-  if (currentMode === mode) return;
-  currentMode = mode;
-  launch.hidden = !mode;
-  if (!mode) dialog.hidden = true;
-  quickActions.innerHTML = mode === 'teacher' ? teacherButtons : mode === 'student' ? studentButtons : '';
-  dialog.querySelector('.oge-ai-title strong').textContent = mode === 'teacher' ? 'ИИ-методист ОГЭ' : 'ИИ-помощник ОГЭ';
-  dialog.querySelector('.oge-ai-title small').textContent = mode === 'teacher' ? 'Помощник преподавателя' : 'Разбираем английский вместе';
-  if (mode) { history = []; log.replaceChildren(); line('assistant', mode === 'teacher' ? 'Здравствуйте! Помогу с заданиями, проверкой работ и планированием уроков.' : 'Привет! Помогу разобраться с английским ОГЭ.'); }
-}
-async function updateVisibility() {
-  if (roleCheckPending) return roleCheckPending;
-  roleCheckPending = resolveMode().then(setMode).finally(() => {roleCheckPending = null;});
-  return roleCheckPending;
-}
+renderActions();
 form.parentNode.insertBefore(quickActions, form);
 
 quickActions.addEventListener('click', event => {
@@ -88,10 +64,25 @@ quickActions.addEventListener('click', event => {
   input.value = button.dataset.prompt;
   input.focus();
 });
+/*quickActions.querySelectorAll('button').forEach(button => {
+  button.addEventListener('click', () => {
+    input.value = button.dataset.prompt;
+    input.focus();
+  });
+});*/
+  function updateVisibility() {
+    let teacher = null;
+    try { teacher = JSON.parse(localStorage.getItem('englishup-auth-session') || 'null'); } catch (_) {}
+    let student = null;
+    try { student = JSON.parse(sessionStorage.getItem('englishup-student-session') || 'null'); } catch (_) {}
+    launch.hidden = !teacher?.access_token && !student?.code;
+    renderActions();
+    if (launch.hidden) dialog.hidden = true;
+  }
   updateVisibility();
-  window.addEventListener('storage', updateVisibility);
-  window.addEventListener('focus', updateVisibility);
-  setInterval(updateVisibility, 5000);
+  window.addEventListener('storage',updateVisibility);
+  window.addEventListener('focus',updateVisibility);
+  setInterval(updateVisibility,1500);
 
   function line(role,text) {
     const item = document.createElement('div');
@@ -100,6 +91,7 @@ quickActions.addEventListener('click', event => {
     log.append(item);
     log.scrollTop = log.scrollHeight;
   }
+  line('assistant','Привет! Помогу разобраться с заданием ОГЭ по английскому. Напиши, что непонятно.');
   launch.onclick = () => { dialog.hidden = !dialog.hidden; if (!dialog.hidden) input.focus(); };
   dialog.querySelector('.oge-ai-close').onclick = () => { dialog.hidden = true; launch.focus(); };
   dialog.addEventListener('keydown',event => { if (event.key === 'Escape') { dialog.hidden = true; launch.focus(); } });
@@ -109,17 +101,22 @@ quickActions.addEventListener('click', event => {
     event.preventDefault();
     const message = input.value.trim();
     if (!message || send.disabled) return;
-    const mode = await resolveMode();
-    setMode(mode);
-    if (!mode) { status.textContent = 'Сначала войди в аккаунт.'; return; }
-    const {account, student} = getSessions();
+  let teacher = null;
+let student = null;
+try { teacher = JSON.parse(localStorage.getItem('englishup-auth-session') || 'null'); } catch (_) {}
+try { student = JSON.parse(sessionStorage.getItem('englishup-student-session') || 'null'); } catch (_) {}
+
+if (!teacher?.access_token && !student?.code) {
+  status.textContent = 'Сначала войди в аккаунт.';
+  return;
+}
     status.textContent = '';
     send.disabled = true;
     line('user',message);
     input.value = '';
     try {const response = await fetch('https://dilyara-boop-englishup-oge-trainer-031d.twc1.net/api/assistant', {
-        method:'POST',headers:{'Content-Type':'application/json',...(account?.access_token && !student?.code ? {Authorization:'Bearer ' + account.access_token} : {})},
-        body:JSON.stringify({message,student_code:student?.code || undefined,history:history.slice(-6),context:document.querySelector('.module-label')?.textContent?.trim() || 'Разделы ОГЭ'})
+        method:'POST',headers:{'Content-Type':'application/json', ...(teacher?.access_token ? {'Authorization':'Bearer ' + teacher.access_token} : {})},
+        body:JSON.stringify({message,history:history.slice(-6),context:document.querySelector('.module-label')?.textContent?.trim() || 'Разделы ОГЭ'})
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || 'Не удалось получить ответ.');
