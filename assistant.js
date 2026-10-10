@@ -81,12 +81,39 @@
   renderSaved();
   const quickActions = document.createElement('div');
 quickActions.className = 'oge-ai-quick-actions';
-let currentTeacher = null;
-try {
-  currentTeacher = JSON.parse(localStorage.getItem('englishup-auth-session') || 'null');
-} catch (_) {}
-
-if (currentTeacher?.access_token && currentTeacher?.user?.user_metadata?.role === 'teacher') {
+let verifiedTeacher = false;
+let checkedToken = null;
+let checkingToken = null;
+const SUPABASE_URL = 'https://hwggubjyeavxgyoqqelw.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_6EzzcMnrKlFWXkVaSP3jzA_gV9Eq5tT';
+function currentToken() {
+  try { return JSON.parse(localStorage.getItem('englishup-auth-session') || 'null')?.access_token || null; }
+  catch (_) { return null; }
+}
+async function checkTeacherRole() {
+  const token = currentToken();
+  if (token === checkedToken || token === checkingToken) return;
+  if (!token) { checkedToken = null; verifiedTeacher = false; renderActions(); return; }
+  checkingToken = token;
+  try {
+    const response = await fetch(SUPABASE_URL + '/auth/v1/user', {
+      headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + token }
+    });
+    if (!response.ok) throw new Error('Не удалось проверить роль');
+    const user = await response.json();
+    if (currentToken() !== token) return;
+    verifiedTeacher = user?.user_metadata?.role === 'teacher';
+    checkedToken = token;
+  } catch (_) {
+    if (currentToken() === token) { verifiedTeacher = false; checkedToken = null; }
+  } finally {
+    if (checkingToken === token) checkingToken = null;
+    renderActions();
+  }
+}
+function renderActions() {
+const isTeacher = verifiedTeacher && Boolean(currentToken());
+if (isTeacher) {
   quickActions.innerHTML = `
     <button type="button" data-prompt="Создай задание в формате ОГЭ по английскому языку по теме: ">📝 Создай задание</button>
     <button type="button" data-prompt="Проверь ответ ученика. Укажи ошибки, объясни их и предложи исправленный вариант: ">✅ Проверь ответ</button>
@@ -104,13 +131,17 @@ if (currentTeacher?.access_token && currentTeacher?.user?.user_metadata?.role ==
   `;
 }
 
+dialog.querySelector('.oge-ai-head strong').textContent = isTeacher ? 'ИИ-помощник учителя' : 'Помощник ОГЭ';
+dialog.querySelector('.oge-ai-head small').textContent = isTeacher ? 'Задания, проверка и планы уроков' : 'Разбираем английский вместе';
+}
+renderActions();
 form.parentNode.insertBefore(quickActions, form);
 
-quickActions.querySelectorAll('button').forEach(button => {
-  button.addEventListener('click', () => {
-    input.value = button.dataset.prompt;
-    input.focus();
-  });
+quickActions.addEventListener('click', event => {
+  const button = event.target.closest('button[data-prompt]');
+  if (!button) return;
+  input.value = button.dataset.prompt;
+  input.focus();
 });
   function updateVisibility() {
     let teacher = null;
@@ -119,6 +150,7 @@ quickActions.querySelectorAll('button').forEach(button => {
     try { student = JSON.parse(sessionStorage.getItem('englishup-student-session') || 'null'); } catch (_) {}
     launch.hidden = !teacher?.access_token && !student?.code;
     if (launch.hidden) dialog.hidden = true;
+    checkTeacherRole();
   }
   updateVisibility();
   window.addEventListener('storage',updateVisibility);
