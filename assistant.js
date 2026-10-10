@@ -3,9 +3,9 @@
   const style = document.createElement('style');
   style.textContent = `
     .oge-ai-launch{position:fixed;right:20px;bottom:20px;z-index:200;border:0;border-radius:999px;padding:13px 19px;background:linear-gradient(100deg,#6559e6,#459edc);color:#fff;font:750 15px system-ui,sans-serif;box-shadow:0 10px 32px #25265c44;cursor:pointer}.oge-ai-launch[hidden]{display:none}
-    .oge-ai-dialog{position:fixed;right:20px;bottom:82px;width:min(410px,calc(100vw - 32px));height:min(520px,calc(100dvh - 110px));z-index:201;display:flex;flex-direction:column;background:#fff;border:1px solid #dedaf5;border-radius:22px;box-shadow:0 18px 60px #25265c55;overflow:hidden;color:#273153;font:15px/1.45 system-ui,sans-serif}
+    .oge-ai-dialog{position:fixed;right:20px;bottom:82px;width:min(660px,calc(100vw - 32px));height:min(680px,calc(100dvh - 110px));z-index:201;display:flex;flex-direction:column;background:#fff;border:1px solid #dedaf5;border-radius:22px;box-shadow:0 18px 60px #25265c55;overflow:hidden;color:#273153;font:15px/1.45 system-ui,sans-serif}
     .oge-ai-dialog[hidden]{display:none}.oge-ai-head{padding:14px 17px;background:linear-gradient(110deg,#6259dd,#4da1da);color:#fff;display:flex;align-items:center;justify-content:space-between;gap:12px}.oge-ai-title{display:flex;align-items:center;gap:11px}.oge-ai-avatar{display:grid;place-items:center;width:39px;height:39px;border-radius:13px;background:#ffffff34;font-size:20px}.oge-ai-head strong{display:block;font-size:16px}.oge-ai-head small{display:block;font-size:12px;opacity:.88}.oge-ai-close{width:34px;height:34px;background:#ffffff2b;border:0;border-radius:10px;color:#fff;font-size:23px;line-height:1;cursor:pointer}
-    .oge-ai-log{padding:18px;min-height:0;overflow:auto;flex:1;display:flex;flex-direction:column;gap:12px}.oge-ai-line{padding:11px 14px;border-radius:16px;max-width:90%;white-space:pre-wrap;overflow-wrap:anywhere}.oge-ai-line.user{align-self:flex-end;background:#eeeaff;border-bottom-right-radius:5px}.oge-ai-line.assistant{align-self:flex-start;background:#eff8fc;border-bottom-left-radius:5px}.oge-ai-status{padding:0 16px;color:#a33143;font-size:13px;min-height:0}.oge-ai-status:not(:empty){padding-bottom:9px}
+    .oge-ai-log{padding:18px;min-height:0;overflow:auto;flex:1;display:flex;flex-direction:column;gap:12px}.oge-ai-line{padding:11px 14px;border-radius:16px;max-width:94%;white-space:pre-wrap;overflow-wrap:anywhere}.oge-ai-line.user{align-self:flex-end;background:#eeeaff;border-bottom-right-radius:5px}.oge-ai-line.assistant{align-self:flex-start;background:#eff8fc;border-bottom-left-radius:5px}.oge-ai-status{padding:0 16px;color:#a33143;font-size:13px;min-height:0}.oge-ai-status:not(:empty){padding-bottom:9px}
     .oge-ai-form{display:flex;align-items:end;gap:8px;padding:12px 14px;border-top:1px solid #eae6f6;flex:0 0 auto;background:#fff}.oge-ai-form textarea{flex:1;min-width:0;min-height:0!important;height:54px!important;max-height:54px!important;resize:none!important;border:1px solid #cac5e8;border-radius:13px!important;padding:9px 12px!important;font:14px/1.3 system-ui,sans-serif!important;box-sizing:border-box}.oge-ai-form button{flex:0 0 auto;height:54px;align-self:end;border:0;border-radius:13px;padding:0 15px;background:#6356d9;color:#fff;font:750 14px system-ui,sans-serif;cursor:pointer}.oge-ai-form button:disabled{opacity:.5;cursor:wait}
     .oge-ai-quick-actions{display:flex;flex-wrap:wrap;gap:7px;padding:10px 14px 4px;background:#fff}
     .oge-ai-quick-actions button{border:1px solid #ddd9ff;background:#f7f5ff;color:#4d46a8;border-radius:18px;padding:7px 10px;font-size:12px;font-weight:600;cursor:pointer}
@@ -15,7 +15,9 @@
     .oge-ai-saved-panel{padding:10px 14px;max-height:220px;overflow:auto;border-bottom:1px solid #eae6f6;background:#faf9ff}
     .oge-ai-saved-panel[hidden]{display:none}.oge-ai-saved-item{background:#fff;border:1px solid #e5e1fa;border-radius:12px;padding:10px;margin:7px 0;overflow-wrap:anywhere}
     .oge-ai-saved-item p{white-space:pre-wrap;max-height:110px;overflow:auto;margin:7px 0}.oge-ai-saved-item button{margin-right:8px;margin-top:6px;border:1px solid #ddd9ff;border-radius:8px;background:#f7f5ff;padding:5px 8px;cursor:pointer}
-    @media(max-width:600px){.oge-ai-launch{right:12px;bottom:12px}.oge-ai-dialog{right:8px;bottom:76px;width:calc(100vw - 16px);height:min(600px,calc(100dvh - 95px))}}
+    .oge-ai-line.assistant{white-space:normal;width:fit-content}.oge-ai-content{line-height:1.6;overflow-wrap:anywhere}.oge-ai-content p{margin:0 0 9px}.oge-ai-content p:last-child{margin-bottom:0}.oge-ai-content ul,.oge-ai-content ol{margin:5px 0 11px;padding-left:22px}.oge-ai-content li{margin:3px 0}.oge-ai-content strong{font-weight:750;color:#252f5a}.oge-ai-content h4{font-size:15px;margin:12px 0 6px;color:#373a84}.oge-ai-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:11px}.oge-ai-actions button{border:1px solid #c7c3ef;border-radius:9px;background:#fff;color:#4d46a8;cursor:pointer;padding:6px 10px;font-size:12px}.oge-ai-actions button:hover{background:#eeeaff}
+    .oge-ai-saved-item p{line-height:1.5}.oge-ai-form textarea:focus{outline:2px solid #a8a0f2;outline-offset:1px}
+    @media(max-width:600px){.oge-ai-launch{right:12px;bottom:12px}.oge-ai-dialog{right:8px;bottom:76px;width:calc(100vw - 16px);height:calc(100dvh - 95px)}}
   `;
   document.head.append(style);
   const launch = document.createElement('button');
@@ -157,21 +159,61 @@ quickActions.addEventListener('click', event => {
   window.addEventListener('focus',updateVisibility);
   setInterval(updateVisibility,1500);
 
+  // Safe minimal Markdown renderer: only text nodes and elements created by this script.
+  function formatInline(parent, value) {
+    const parts = String(value).split(/(\*\*[^*\n]+\*\*|`[^`\n]+`)/g);
+    parts.forEach(part => {
+      if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+        const strong = document.createElement('strong'); strong.textContent = part.slice(2, -2); parent.append(strong);
+      } else if (part.startsWith('`') && part.endsWith('`') && part.length > 2) {
+        const code = document.createElement('code'); code.textContent = part.slice(1, -1); parent.append(code);
+      } else parent.append(document.createTextNode(part));
+    });
+  }
+  function formatAnswer(target, text) {
+    const lines = String(text).replace(/\r\n?/g, '\n').split('\n');
+    let list = null;
+    lines.forEach(raw => {
+      const trimmed = raw.trim();
+      if (!trimmed) { list = null; return; }
+      const bullet = trimmed.match(/^[-*•]\s+(.+)$/);
+      const numbered = trimmed.match(/^\d+[.)]\s+(.+)$/);
+      if (bullet || numbered) {
+        const type = numbered ? 'ol' : 'ul';
+        if (!list || list.tagName.toLowerCase() !== type) { list = document.createElement(type); target.append(list); }
+        const li = document.createElement('li'); formatInline(li, (bullet || numbered)[1]); list.append(li);
+      } else {
+        list = null;
+        const heading = trimmed.match(/^#{1,4}\s+(.+)$/);
+        const el = document.createElement(heading ? 'h4' : 'p');
+        formatInline(el, heading ? heading[1] : trimmed); target.append(el);
+      }
+    });
+  }
   function line(role,text) {
     const item = document.createElement('div');
     item.className = 'oge-ai-line ' + role;
-    item.textContent = text;
-    if (role === 'assistant' && text && !text.startsWith('Привет! Помогу разобраться')) {
-      const save = document.createElement('button');
-      save.type = 'button'; save.className = 'oge-ai-save'; save.textContent = '💾 Сохранить ответ';
-      save.onclick = () => {
-        const items = readSaved();
-        if (items.some(x => x.text === text)) { save.textContent = '✓ Уже сохранено'; return; }
-        items.unshift({text, date: new Date().toLocaleString('ru-RU')});
-        if (writeSaved(items.slice(0, 60))) { save.textContent = '✓ Сохранено'; renderSaved(); }
-      };
-      item.append(save);
-    }
+    if (role === 'assistant') {
+      const content = document.createElement('div'); content.className = 'oge-ai-content';
+      formatAnswer(content, text); item.append(content);
+      if (text && !text.startsWith('Привет! Помогу разобраться')) {
+        const actions = document.createElement('div'); actions.className = 'oge-ai-actions';
+        const copy = document.createElement('button'); copy.type = 'button'; copy.textContent = '📋 Копировать';
+        copy.onclick = async () => {
+          try { await navigator.clipboard.writeText(text); copy.textContent = '✓ Скопировано'; }
+          catch (_) { status.textContent = 'Не удалось скопировать ответ.'; }
+        };
+        const save = document.createElement('button');
+        save.type = 'button'; save.className = 'oge-ai-save'; save.textContent = '💾 Сохранить';
+        save.onclick = () => {
+          const items = readSaved();
+          if (items.some(x => x.text === text)) { save.textContent = '✓ Уже сохранено'; return; }
+          items.unshift({text, date: new Date().toLocaleString('ru-RU')});
+          if (writeSaved(items.slice(0, 60))) { save.textContent = '✓ Сохранено'; renderSaved(); }
+        };
+        actions.append(copy, save); item.append(actions);
+      }
+    } else item.textContent = text;
     log.append(item);
     log.scrollTop = log.scrollHeight;
   }
