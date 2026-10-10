@@ -27,7 +27,7 @@
   const dialog = document.createElement('section');
   dialog.className = 'oge-ai-dialog'; dialog.hidden = true;
   dialog.setAttribute('role','dialog'); dialog.setAttribute('aria-label','Помощник по английскому ОГЭ');
-  dialog.innerHTML = '<div class="oge-ai-head"><div class="oge-ai-title"><span class="oge-ai-avatar" aria-hidden="true">✦</span><span><strong>Помощник ОГЭ</strong><small>Разбираем английский вместе</small></span></div><button class="oge-ai-close" type="button" aria-label="Закрыть">×</button></div><div class="oge-ai-log" role="log" aria-live="polite"></div><div class="oge-ai-status" aria-live="polite"></div><form class="oge-ai-form"><textarea rows="2" maxlength="500" aria-label="Вопрос помощнику" placeholder="Спроси о задании…" required></textarea><button type="submit">Отправить</button></form>';
+  dialog.innerHTML = '<div class="oge-ai-head"><div class="oge-ai-title"><span class="oge-ai-avatar" aria-hidden="true">✦</span><span><strong>Помощник ОГЭ</strong><small>Разбираем английский вместе</small></span></div><button class="oge-ai-close" type="button" aria-label="Закрыть">×</button></div><div class="oge-ai-log" role="log" aria-live="polite"></div><div class="oge-ai-status" aria-live="polite"></div><form class="oge-ai-form"><textarea rows="2" maxlength="6000" aria-label="Вопрос помощнику" placeholder="Спроси о задании…" required></textarea><button type="submit">Отправить</button></form>';
   document.body.append(launch,dialog);
   const savedToggle = document.createElement('button');
   savedToggle.type = 'button';
@@ -122,6 +122,7 @@ if (isTeacher) {
     <button type="button" data-prompt="Проанализируй ошибки ученика, определи слабые темы и предложи, что нужно повторить: ">📊 Разбери ошибки</button>
     <button type="button" data-prompt="Составь план занятия по английскому языку с подготовкой к ОГЭ по теме: ">🎓 План урока</button>
     <button type="button" data-prompt="Объясни эту тему простыми словами так, чтобы я могла объяснить её ученику: ">💡 Объясни тему</button>
+    <button type="button" data-prompt="Проверь электронное письмо ученика в формате задания 35 ОГЭ по английскому языку. Сначала найди ниже условие задания и текст ответа. Оцени предварительно по действующим критериям ФИПИ: решение коммуникативной задачи (0–3), организация текста (0–2), лексико-грамматическое оформление (0–3), орфография и пунктуация (0–2). Укажи обоснование каждого балла, итог из 10, конкретные ошибки с исправлениями и рекомендации. Если условие задания не дано, запроси его: без него нельзя достоверно оценить решение коммуникативной задачи. Если есть сомнения в применимости критериев или ограничениях максимального балла, явно сообщи об этом. Не выдумывай ошибки. Это предварительная оценка, окончательный балл ставит учитель. Не включай личные данные ученика.\n\nУсловие задания:\n\nОтвет ученика:\n">✉️ Проверить письмо ОГЭ</button>
   `;
 } else {
   quickActions.innerHTML = `
