@@ -1,5 +1,4 @@
 import express from "express";
-
 const app = express();
 const SUPABASE_URL = 'https://hwggubjyeavxgyoqqelw.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_6EzzcMnrKlFWXkVaSP3jzA_gV9Eq5tT';
@@ -163,17 +162,29 @@ app.post("/api/assistant", async (req, res) => {
         },
         body: JSON.stringify({
           model: "GigaChat",
-          messages: [
-            {
-              role: "system",
-              content:
-                mode === 'teacher' ? teacherPrompt : studentPrompt
-            },
-            {
-              role: "user",
-              content: question
-            }
-          ],
+         
+messages: [
+  {
+    role: "system",
+    content: mode === 'teacher' ? teacherPrompt : studentPrompt
+  },
+  ...(Array.isArray(req.body?.history) ? req.body.history : [])
+    .filter(item =>
+      item &&
+      ['user', 'assistant'].includes(item.role) &&
+      typeof item.text === 'string'
+    )
+    .slice(-6)
+    .map(item => ({
+      role: item.role,
+      content: item.text.slice(0, 6000)
+    })),
+  {
+    role: "user",
+    content: question
+  }
+],
+
           temperature: 0.7
         })
       }
